@@ -1,0 +1,37 @@
+name: Youdao Note Check-in
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 0 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: youdao-note-checkin
+  cancel-in-progress: false
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      YOUDAO_ACCOUNTS: ${{ secrets.YOUDAO_ACCOUNTS }}
+      PUSHDEER_KEY: ${{ secrets.PUSHDEER_KEY }}
+      YOUDAO_AD_REWARDS: "false"
+      YOUDAO_DEVICE_TYPE: "Linux"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install .
+
+      - name: Run check-in
+        run: python -m youdao_checkin.main
